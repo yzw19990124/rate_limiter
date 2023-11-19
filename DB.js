@@ -18,7 +18,20 @@ pool.query('SELECT NOW()', (err, res) => {
       console.error(err);
       return;
     }
-    console.log('Connection successful, current time:', res.rows[0].now);
+    console.log('Testing connection successful, current time:', res.rows[0].now);
     pool.end();
   });
-  
+
+//Define one functionality of the DB
+module.exports.get = (key, callback) => {
+    pool.query('select current_user', (err, res) => {
+        if (err) {
+            console.error('Error occurred when testing queries', err);
+            callback(err, null);
+        } else {
+            console.log('Testing query - current user: ', res.rows[0].current_user);
+            callback(null, res.rows[0].current_user);
+            pool.end();
+        }
+    });
+};
