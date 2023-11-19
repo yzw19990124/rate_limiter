@@ -19,7 +19,6 @@ pool.query('SELECT NOW()', (err, res) => {
       return;
     }
     console.log('Testing connection successful, current time:', res.rows[0].now);
-    pool.end();
   });
 
 //Define one functionality of the DB
@@ -31,7 +30,13 @@ module.exports.get = (key, callback) => {
         } else {
             console.log('Testing query - current user: ', res.rows[0].current_user);
             callback(null, res.rows[0].current_user);
-            pool.end();
         }
+    });
+};
+
+//Close the db when ther server is shutting down
+module.exports.closePool = () => {
+    pool.end(() => {
+        console.log('Shutting down connection to the postgressql server.')
     });
 };
