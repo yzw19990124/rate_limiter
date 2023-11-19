@@ -22,7 +22,12 @@ process.on('SIGTERM', () => {
 
 const req_table = {};
 
-app.get('/user.html', function(req, res) {
+//For testing purpose, assuming the incoming request has a format like this:
+//curl -H 'user: name1' http://localhost:3000/current_user
+//Need to fix db's get function if want to support more psql queries.
+app.get('/current_user', function(req, res) {
+    //Rate Limiter, If same user tries submit two requests in between 5s
+    //access will get denied due to rate limiting. 
     const {user} = req.headers;
     if (user in req_table) {
         const prev_req_time = req_table[user];
@@ -32,8 +37,12 @@ app.get('/user.html', function(req, res) {
         }
     }
 
-    db.get('user.html', info => {
-        req_table[user] = Date.now();
-        res.send(info + '\n');
+    db.get('current_user', (err, info) => {
+        if (err) {
+            res.send(err + '\n');
+        } else {
+            req_table[user] = Date.now();
+            res.send(info + '\n');
+        }
     });
 });

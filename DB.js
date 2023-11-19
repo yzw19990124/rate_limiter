@@ -23,16 +23,20 @@ pool.query('SELECT NOW()', (err, res) => {
 
 //Define one functionality of the DB
 module.exports.get = (key, callback) => {
-    pool.query('select current_user', (err, res) => {
+    const safeKey = key.replace(/[^a-zA-Z0-9_]/g, ''); // Basic sanitization
+    const safe_query = `SELECT ${safeKey}`;
+    pool.query(safe_query, (err, res) => {
         if (err) {
-            console.error('Error occurred when testing queries', err);
+            console.error('Error occurred when executing query', err);
             callback(err, null);
         } else {
-            console.log('Testing query - current user: ', res.rows[0].current_user);
-            callback(null, res.rows[0].current_user);
+            const resultValue = res.rows.length > 0 ? res.rows[0][safeKey] : null;
+            console.log(`Testing query - ${safeKey}: `, resultValue);
+            callback(null, resultValue);
         }
     });
 };
+
 
 //Close the db when ther server is shutting down
 module.exports.closePool = () => {
